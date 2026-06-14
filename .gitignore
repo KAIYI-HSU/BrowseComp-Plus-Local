@@ -7,6 +7,9 @@ indexes/
 tmp/
 retrieval/
 data/browsecomp_plus_decrypted.jsonl
+data/ground_truth_slim.jsonl
+data/tags/
 topics-qrels/queries.tsv
 runs/
 evals/
+reports/

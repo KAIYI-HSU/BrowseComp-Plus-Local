@@ -1,0 +1,30 @@
+# Minimal E2E smoke config: 3 fixed queries through the full pipeline.
+#   python -m fireworks_eval.run_experiment --config configs/smoke.yaml
+# or use the dedicated smoke runner with built-in validation:
+#   python -m fireworks_eval.smoke_test
+experiment_name: e2e_smoke
+
+dataset:
+  query_ids: ["769", "770", "771"]
+
+data_source:
+  name: qwen3-0.6b-snippet512
+  k: 5
+  snippet_max_tokens: 512
+  endpoint: auto
+  port: 8123
+
+agent:
+  model: accounts/fireworks/models/gpt-oss-120b
+  query_template: QUERY_TEMPLATE_NO_GET_DOCUMENT
+  reasoning_effort: high
+  max_tokens: 8000
+  max_iterations: 30
+  num_threads: 3
+
+judge:
+  model: accounts/fireworks/models/gpt-oss-120b
+  num_threads: 3
+
+tagging:
+  enabled: false

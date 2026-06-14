@@ -1,0 +1,86 @@
+# =============================================================================
+# fireworks_eval — fully documented experiment config.
+# One experiment == one config file. Run it with:
+#   python -m fireworks_eval.run_experiment --config configs/experiment.example.yaml
+# Two experiments differ exactly by their config diff — that is how you measure
+# the effect of changing a model, a prompt, or the data source.
+# =============================================================================
+
+experiment_name: example_qwen3_06b_gptoss120b   # used in runs/ evals/ reports/ paths
+description: "Reference setup: gpt-oss-120b agent + Qwen3-Embedding-0.6B retrieval"
+
+# --- Dataset & subset --------------------------------------------------------
+dataset:
+  ground_truth: data/browsecomp_plus_decrypted.jsonl  # 830-query source (large)
+  slim_cache: data/ground_truth_slim.jsonl            # auto-built {qid,query,answer}
+  # Pick ONE selection mode (else all 830 are used):
+  query_ids: []        # e.g. ["769","770","771"] for an explicit subset
+  sample:              # e.g. 50 for a random sample
+  seed: 42
+  qrel_evidence: topics-qrels/qrel_evidence.txt       # evidence relevance (recall)
+  qrel_gold: topics-qrels/qrel_golds.txt              # gold relevance (reference)
+  tags_file:           # optional {qid: domain} JSON to slice by domain
+
+# --- Data source (the swappable retrieval profile) ---------------------------
+# Summary mode  = small snippet_max_tokens (truncated previews).
+# Full-text mode = snippet_max_tokens: -1 and/or get_document: true.
+# Swap corpus/retriever via backend + index_path + model_name.
+data_source:
+  name: qwen3-0.6b-snippet512
+  backend: faiss                                       # faiss | reasonir (bm25 needs Java)
+  index_path: "indexes/qwen3-embedding-0.6b/corpus.shard*.pkl"
+  model_name: Qwen/Qwen3-Embedding-0.6B               # hosted locally as an endpoint
+  normalize: true
+  pooling: eos
+  torch_dtype: auto                                    # auto -> float32 on CPU (Mac)
+  dataset_name: Tevatron/browsecomp-plus-corpus
+  k: 5                                                 # results per search
+  snippet_max_tokens: 512                              # 512=summary; -1=full text
+  get_document: false                                  # expose full-document tool
+  endpoint: auto                                       # auto-managed local server, or http://host:port
+  host: 127.0.0.1
+  port: 8123
+  startup_timeout_s: 900                               # first start loads model + corpus
+
+# --- Agent under test (stage 1 model + prompt) -------------------------------
+agent:
+  type: fireworks_reference     # fireworks_reference | external | python:<module>:<factory>
+  model: accounts/fireworks/models/gpt-oss-120b
+  base_url: https://api.fireworks.ai/inference/v1      # change to switch provider
+  api_key_env: FIREWORKS_API_KEY
+  query_template: QUERY_TEMPLATE_NO_GET_DOCUMENT       # swap the prompt here
+  system_prompt:                                       # optional extra system prompt
+  temperature:                                         # null -> provider default
+  top_p:
+  reasoning_effort: high                               # low|medium|high|null (gpt-oss)
+  max_tokens: 10000
+  max_iterations: 50
+  num_threads: 4
+  request_timeout_s: 600
+  external_runs_dir:                                   # required only when type: external
+
+# --- Judge (stage 2 model) ---------------------------------------------------
+judge:
+  model: accounts/fireworks/models/gpt-oss-120b        # swap the judge independently
+  base_url: https://api.fireworks.ai/inference/v1
+  api_key_env: FIREWORKS_API_KEY
+  max_output_tokens: 1024
+  temperature: 0.0
+  reasoning_effort:                                    # usually null for judging
+  num_threads: 4
+
+# --- Per-domain tagging (optional) -------------------------------------------
+tagging:
+  enabled: false
+  taxonomy: configs/taxonomy/default.json
+  model: accounts/fireworks/models/gpt-oss-120b
+  base_url: https://api.fireworks.ai/inference/v1
+  api_key_env: FIREWORKS_API_KEY
+  # cache: data/tags/<experiment_name>.json  (defaulted automatically)
+  num_threads: 4
+
+# --- Output locations ({experiment_name} is substituted) ---------------------
+output:
+  runs_dir: runs/{experiment_name}
+  evals_dir: evals/{experiment_name}
+  report_dir: reports/{experiment_name}

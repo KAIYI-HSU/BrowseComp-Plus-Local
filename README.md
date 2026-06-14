@@ -207,6 +207,35 @@ As an alternative to deploying the retrieval server yourself locally, you can al
 
 To incorporate your own retriever with the search agents, you can refer to [Custom Retriever](docs/custom_retriever.md).
 
+---
+
+## 🔥 Automated Eval Pipeline (`fireworks_eval`)
+
+`fireworks_eval/` is a **100%-automated evaluation pipeline** for iterating on your own
+Deep-Research agent. It routes all LLM calls through an OpenAI-compatible endpoint
+(**Fireworks** by default, `FIREWORKS_API_KEY`) and runs retrieval locally
+(Qwen3-Embedding-0.6B + FAISS) behind a managed local HTTP endpoint — so you can measure
+the effect of changing the **model (per stage)**, the **prompt**, or the **data source**,
+and detect improvements vs. side-effects on every change.
+
+```bash
+# E2E smoke test: 3 queries through the full pipeline + output validation
+python -m fireworks_eval.smoke_test
+
+# Run an experiment from a config
+python -m fireworks_eval.run_experiment --config configs/experiment.example.yaml
+
+# Compare two experiments (improvement vs regressions)
+python -m fireworks_eval.compare --baseline evals/exp_a --candidate evals/exp_b
+```
+
+Full I/O formats, the run-file contract for plugging in **your own agent**, per-domain
+evaluation, and metric definitions are documented in
+**[docs/fireworks_eval.md](docs/fireworks_eval.md)**.
+
+繁體中文逐步使用說明（含切換模型／資料集、HPC Cluster 離線遷移與預先下載指引）：
+**[docs/USAGE.zh-TW.md](docs/USAGE.zh-TW.md)**。
+
 ## Contact
 
 If you have any questions or suggestions, please contact us at:
