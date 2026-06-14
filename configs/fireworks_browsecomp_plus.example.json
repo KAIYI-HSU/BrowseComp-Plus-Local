@@ -1,0 +1,71 @@
+{
+  "ground_truth": "data/browsecomp_plus_decrypted.jsonl",
+  "qrel_evidence": "topics-qrels/qrel_evidence.txt",
+  "eval_dir": "evals/fireworks",
+  "comparison_path": "evals/fireworks/comparison_summary.json",
+  "judge": {
+    "api_key_env": "FIREWORKS_API_KEY",
+    "base_url": "https://api.fireworks.ai/inference/v1",
+    "model": "accounts/fireworks/models/gpt-oss-120b",
+    "max_output_tokens": 10000,
+    "temperature": 0.0,
+    "reasoning_effort": "low"
+  },
+  "scenarios": [
+    {
+      "name": "gpt-oss-120b_bm25_high",
+      "run_dir": "runs/fireworks/gpt-oss-120b/bm25_high",
+      "agent_command": [
+        "python",
+        "search_agent/fireworks_client.py",
+        "--query",
+        "topics-qrels/queries.tsv",
+        "--model",
+        "accounts/fireworks/models/gpt-oss-120b",
+        "--output-dir",
+        "runs/fireworks/gpt-oss-120b/bm25_high",
+        "--searcher-type",
+        "bm25",
+        "--index-path",
+        "indexes/bm25/",
+        "--reasoning-effort",
+        "high",
+        "--max-tokens",
+        "10000",
+        "--num-threads",
+        "4"
+      ]
+    },
+    {
+      "name": "gpt-oss-120b_qwen3-0p6b_local_high",
+      "run_dir": "runs/fireworks/gpt-oss-120b/qwen3_0p6b_high",
+      "agent_command": [
+        "python",
+        "search_agent/fireworks_client.py",
+        "--query",
+        "topics-qrels/queries.tsv",
+        "--model",
+        "accounts/fireworks/models/gpt-oss-120b",
+        "--output-dir",
+        "runs/fireworks/gpt-oss-120b/qwen3_0p6b_high",
+        "--searcher-type",
+        "openai-embedding-faiss",
+        "--index-path",
+        "indexes/qwen3-embedding-0.6b/corpus.shard*.pkl",
+        "--embedding-model",
+        "Qwen/Qwen3-Embedding-0.6B",
+        "--embedding-base-url",
+        "http://localhost:8000/v1",
+        "--embedding-api-key",
+        "EMPTY",
+        "--normalize",
+        "--reasoning-effort",
+        "high",
+        "--max-tokens",
+        "10000",
+        "--num-threads",
+        "4"
+      ]
+    }
+  ]
+}

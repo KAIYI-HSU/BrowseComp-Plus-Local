@@ -116,6 +116,10 @@ where you may pass in `--tensor_parallel_size {num_gpus}` to adjust the number o
 
 > Note that the script above evalutes using Qwen3-32B as a judge. For more details on evaluation, please refer to [docs/llm_as_judge.md](docs/llm_as_judge.md).
 
+For a Fireworks/OpenAI-compatible automated development pipeline that can run
+multiple scenarios, evaluate existing run directories, and compare model/prompt/
+retriever/data-source changes, see [docs/evaluation_pipeline.md](docs/evaluation_pipeline.md).
+
 ### Submitting to the Leaderboard
 
 After running the evaluation script, you should obtain a summary json file similar to:
